@@ -17,7 +17,7 @@ const (
 	Illegal TokenType = "Illegal"
 	Eof               = "Eof"
 
-	EndLine = "EndLine"
+	NewLine = "NewLine"
 
 	Semicolon = "Semicolon" // ;
 	Colon     = "Colon"     // :

@@ -1,6 +1,8 @@
 package lexer
 
 import (
+	"fmt"
+
 	"git.robaertschi.xyz/robaertschi/thorgot/token"
 )
 
@@ -22,6 +24,10 @@ func New(input string) Lexer {
 	lexer.readChar()
 
 	return lexer
+}
+
+func (l Lexer) String() string {
+	return fmt.Sprintf("Lexer{input: \"%v\", ch: '%c', pos: %v, readPos: %v, col: %v, line: %v}", l.input, l.ch, l.pos, l.readPos, l.col, l.line)
 }
 
 func (l *Lexer) readChar() {
@@ -92,11 +98,12 @@ func (l *Lexer) readNumber() token.Token {
 func (l *Lexer) NextToken() token.Token {
 	l.skipWhitespace()
 	var tok token.Token
+	tok.Loc = token.Loc{Line: l.line, Col: l.col}
 	tok.Literal = string(l.ch)
 
 	switch l.ch {
 	case '\n':
-		tok.Token = token.EndLine
+		tok.Token = token.NewLine
 	case ';':
 		tok.Token = token.Semicolon
 	case ':':
