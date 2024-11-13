@@ -29,6 +29,8 @@ const (
 
 	Identifier = "Identifier"
 
+	Integer = "Integer" // 19232
+
 	// Keywords
 	Fn = "Fn" // fn
 )
