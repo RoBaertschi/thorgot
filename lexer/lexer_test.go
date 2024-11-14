@@ -12,19 +12,19 @@ func TestCorrectTokens(t *testing.T) {
 		expectedTokens []token.Token
 		input          string
 	}{{
-		expectedTokens: []token.Token{{Token: token.Eof, Literal: "", Loc: token.Loc{Line: 1, Col: 1}}},
+		expectedTokens: []token.Token{{Type: token.Eof, Literal: "", Loc: token.Loc{Line: 1, Col: 1}}},
 		input:          "",
 	}, {input: "hello 1234 ; () {}\n",
 		expectedTokens: []token.Token{
-			{Token: token.Identifier, Literal: "hello", Loc: token.Loc{Line: 1, Col: 1}},
-			{Token: token.Integer, Literal: "1234", Loc: token.Loc{Line: 1, Col: 7}},
-			{Token: token.Semicolon, Literal: ";", Loc: token.Loc{Line: 1, Col: 12}},
-			{Token: token.LParen, Literal: "(", Loc: token.Loc{Line: 1, Col: 14}},
-			{Token: token.RParen, Literal: ")", Loc: token.Loc{Line: 1, Col: 15}},
-			{Token: token.LBrace, Literal: "{", Loc: token.Loc{Line: 1, Col: 17}},
-			{Token: token.RBrace, Literal: "}", Loc: token.Loc{Line: 1, Col: 18}},
-			{Token: token.NewLine, Literal: "\n", Loc: token.Loc{Line: 2, Col: 1}},
-			{Token: token.Eof, Literal: "", Loc: token.Loc{Line: 2, Col: 2}},
+			{Type: token.Identifier, Literal: "hello", Loc: token.Loc{Line: 1, Col: 1}},
+			{Type: token.Integer, Literal: "1234", Loc: token.Loc{Line: 1, Col: 7}},
+			{Type: token.Semicolon, Literal: ";", Loc: token.Loc{Line: 1, Col: 12}},
+			{Type: token.LParen, Literal: "(", Loc: token.Loc{Line: 1, Col: 14}},
+			{Type: token.RParen, Literal: ")", Loc: token.Loc{Line: 1, Col: 15}},
+			{Type: token.LBrace, Literal: "{", Loc: token.Loc{Line: 1, Col: 17}},
+			{Type: token.RBrace, Literal: "}", Loc: token.Loc{Line: 1, Col: 18}},
+			{Type: token.NewLine, Literal: "\n", Loc: token.Loc{Line: 2, Col: 1}},
+			{Type: token.Eof, Literal: "", Loc: token.Loc{Line: 2, Col: 2}},
 		}}}
 
 	for _, test := range tests {
@@ -36,8 +36,8 @@ func TestCorrectTokens(t *testing.T) {
 				t.Errorf("Literal is not equal: actual = (%v) is not expected = (%v)", actual.Literal, expected.Literal)
 			}
 
-			if expected.Token != actual.Token {
-				t.Errorf("Token is not equal: actual = (%v) is not expected = (%v)", actual.Token, expected.Token)
+			if expected.Type != actual.Type {
+				t.Errorf("Token is not equal: actual = (%v) is not expected = (%v)", actual.Type, expected.Type)
 			}
 
 			if expected.Loc.Line != actual.Loc.Line {

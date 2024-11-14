@@ -48,7 +48,7 @@ func (l *Lexer) readChar() {
 }
 
 func (l *Lexer) makeToken(t token.TokenType, literal string) token.Token {
-	return token.Token{Token: t, Literal: literal, Loc: token.Loc{Line: l.line, Col: l.col}}
+	return token.Token{Type: t, Literal: literal, Loc: token.Loc{Line: l.line, Col: l.col}}
 }
 
 func isDigit(ch byte) bool {
@@ -81,7 +81,7 @@ func (l *Lexer) readIdentifier() token.Token {
 
 	t := token.LookupKeyword(l.input[pos:l.pos])
 
-	return token.Token{Token: t, Loc: loc, Literal: l.input[pos:l.pos]}
+	return token.Token{Type: t, Loc: loc, Literal: l.input[pos:l.pos]}
 }
 
 func (l *Lexer) readNumber() token.Token {
@@ -92,7 +92,7 @@ func (l *Lexer) readNumber() token.Token {
 		l.readChar()
 	}
 
-	return token.Token{Token: token.Integer, Loc: loc, Literal: l.input[pos:l.pos]}
+	return token.Token{Type: token.Integer, Loc: loc, Literal: l.input[pos:l.pos]}
 }
 
 func (l *Lexer) NextToken() token.Token {
@@ -103,21 +103,23 @@ func (l *Lexer) NextToken() token.Token {
 
 	switch l.ch {
 	case '\n':
-		tok.Token = token.NewLine
+		tok.Type = token.NewLine
 	case ';':
-		tok.Token = token.Semicolon
+		tok.Type = token.Semicolon
 	case ':':
-		tok.Token = token.Colon
+		tok.Type = token.Colon
+	case ',':
+		tok.Type = token.Comma
 	case '=':
-		tok.Token = token.Equal
+		tok.Type = token.Equal
 	case '{':
-		tok.Token = token.LBrace
+		tok.Type = token.LBrace
 	case '}':
-		tok.Token = token.RBrace
+		tok.Type = token.RBrace
 	case '(':
-		tok.Token = token.LParen
+		tok.Type = token.LParen
 	case ')':
-		tok.Token = token.RParen
+		tok.Type = token.RParen
 
 	case 0:
 		return l.makeToken(token.Eof, "")
@@ -129,7 +131,7 @@ func (l *Lexer) NextToken() token.Token {
 			return l.readNumber()
 		}
 
-		tok.Token = token.Illegal
+		tok.Type = token.Illegal
 	}
 
 	l.readChar()

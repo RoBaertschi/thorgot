@@ -34,6 +34,29 @@ func (t Type) String() string {
 	return string(t)
 }
 
+type Program struct {
+	Statements []StatementNode
+}
+
+func (p *Program) TokenLiteral() string {
+	if len(p.Statements) > 0 {
+		return p.Statements[0].TokenLiteral()
+	} else {
+		return ""
+	}
+}
+
+func (p *Program) String() string {
+	out := strings.Builder{}
+
+	for _, statement := range p.Statements {
+		out.WriteString(statement.String(0))
+		out.WriteString("\n")
+	}
+
+	return out.String()
+}
+
 type Block struct {
 	Token      token.Token // the RBrace token
 	Statements []StatementNode
@@ -66,7 +89,7 @@ type Function struct {
 	Arguments     []FunctionArgument
 	ReturnType    Type
 	HasReturnType bool
-	Block         Block
+	Block         *Block
 }
 
 func (f *Function) TokenLiteral() string { return f.Token.Literal }

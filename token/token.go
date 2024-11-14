@@ -8,7 +8,7 @@ type Loc struct {
 }
 
 type Token struct {
-	Token   TokenType
+	Type    TokenType
 	Literal string
 	Loc     Loc
 }
@@ -21,6 +21,7 @@ const (
 
 	Semicolon = "Semicolon" // ;
 	Colon     = "Colon"     // :
+	Comma     = ","         // ,
 	Equal     = "Equal"     // =
 	LBrace    = "LBrace"    // {
 	RBrace    = "RBrace"    // }
