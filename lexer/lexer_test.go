@@ -33,11 +33,11 @@ func TestCorrectTokens(t *testing.T) {
 			actual := lexer.NextToken()
 
 			if expected.Literal != actual.Literal {
-				t.Errorf("Literal is not equal: actual = (%v) is not expected = (%v)", actual.Literal, expected.Literal)
+				t.Errorf("Literal is not equal: actual = (%q) is not expected = (%q)", actual.Literal, expected.Literal)
 			}
 
 			if expected.Type != actual.Type {
-				t.Errorf("Token is not equal: actual = (%v) is not expected = (%v)", actual.Type, expected.Type)
+				t.Errorf("Token is not equal: actual = (%q) is not expected = (%q)", actual.Type, expected.Type)
 			}
 
 			if expected.Loc.Line != actual.Loc.Line {

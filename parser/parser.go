@@ -2,16 +2,37 @@ package parser
 
 import (
 	"fmt"
+	"strconv"
 
 	"git.robaertschi.xyz/robaertschi/thorgot/ast"
 	"git.robaertschi.xyz/robaertschi/thorgot/lexer"
 	"git.robaertschi.xyz/robaertschi/thorgot/token"
 )
 
+const (
+	_ int = iota
+	Lowest
+	// Equals
+	// LessGreater
+	// Sum
+	// Product
+	// Prefix
+	// Call
+	// Index
+)
+
+var precedences = map[token.TokenType]int{}
+
+type prefixFunction func() ast.ExpressionNode
+type infixFunction func(ast.ExpressionNode) ast.ExpressionNode
+
 type Parser struct {
 	lexer     lexer.Lexer
 	curToken  token.Token
 	peekToken token.Token
+
+	prefixFunctions map[token.TokenType]prefixFunction
+	infixFunctions  map[token.TokenType]infixFunction
 
 	Errors []error
 }
@@ -19,10 +40,19 @@ type Parser struct {
 func New(lexer lexer.Lexer) Parser {
 	p := Parser{}
 
+	p.prefixFunctions = make(map[token.TokenType]prefixFunction)
+	p.registerPrefix(token.Integer, p.parseIntegerLiteral)
+
+	p.infixFunctions = make(map[token.TokenType]infixFunction)
+
 	p.nextToken()
 	p.nextToken()
 
 	return p
+}
+
+func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixFunction) {
+	p.prefixFunctions[tokenType] = fn
 }
 
 func (p *Parser) error(err error) ast.StatementNode {
@@ -45,7 +75,7 @@ func (p *Parser) peekTokenIs(t token.TokenType) bool {
 }
 
 func (p *Parser) peekError(t token.TokenType) {
-	err := fmt.Errorf("Expected token %v to be %v", t, p.peekToken.Type)
+	err := fmt.Errorf("Expected token %q to be %q", t, p.peekToken.Type)
 	p.Errors = append(p.Errors, err)
 }
 
@@ -160,4 +190,86 @@ func (p *Parser) parseBlock() *ast.Block {
 	p.nextToken()
 
 	return b
+}
+
+func (p *Parser) parseImplicitVariableDefiniton() *ast.ImplicitVariableDefiniton {
+	iv := &ast.ImplicitVariableDefiniton{Token: p.curToken}
+	iv.Name = p.curToken.Literal
+
+	if !p.expectPeek(token.Colon) {
+		return nil
+	}
+
+	if !p.expectPeek(token.Equal) {
+		return nil
+	}
+
+	// move onto the expression
+	p.nextToken()
+
+	iv.Value = p.parseExpression(Lowest)
+
+	if iv.Value == nil {
+		return nil
+	}
+
+	if !p.peekTokenIs(token.NewLine) && !p.peekTokenIs(token.Semicolon) {
+		p.error(fmt.Errorf("variable definiton expected either an new line or an semicolon to end the definiton"))
+		return nil
+	}
+
+	p.nextToken()
+	p.nextToken()
+
+	return iv
+}
+
+// Expressions
+
+func (p *Parser) peekPrecedence() int {
+	if p, ok := precedences[p.peekToken.Type]; ok {
+		return p
+	}
+
+	return Lowest
+}
+
+func (p *Parser) noPrefixFunction(tokenType token.TokenType) {
+	p.error(fmt.Errorf("could not find prefix expression function for token %q", tokenType))
+}
+
+func (p *Parser) parseExpression(precedence int) ast.ExpressionNode {
+	prefix := p.prefixFunctions[p.curToken.Type]
+	if prefix == nil {
+		p.noPrefixFunction(p.curToken.Type)
+		return nil
+	}
+	leftExpr := prefix()
+
+	for !p.peekTokenIs(token.Semicolon) && precedence < p.peekPrecedence() {
+		infix := p.infixFunctions[p.peekToken.Type]
+		if infix == nil {
+			return leftExpr
+		}
+
+		p.nextToken()
+
+		leftExpr = infix(leftExpr)
+	}
+
+	return leftExpr
+}
+
+func (p *Parser) parseIntegerLiteral() ast.ExpressionNode {
+	lit := &ast.IntegerLiteral{Token: p.curToken}
+
+	value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
+	if err != nil {
+		p.error(fmt.Errorf("could not parse %q as integer", p.curToken.Literal))
+		return nil
+	}
+
+	lit.Value = value
+
+	return lit
 }
